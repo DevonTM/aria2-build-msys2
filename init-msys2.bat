@@ -31,7 +31,7 @@ for %%i in (mirrorlist.mingw32 mirrorlist.mingw64 mirrorlist.msys) do if exist %
 %pacman% -Suu --needed --noconfirm --ask=20 2>&1 | busybox tee -a update.log
 
 :Install
-%pacman% -S --needed --noconfirm base-devel zlib-devel sqlite git unzip zip tar gmp gmp-devel libssh2 libssh2-devel openssl-devel 2>&1 | busybox tee -a install.log
+%pacman% -S --needed --noconfirm base-devel autotools zlib-devel sqlite git unzip zip tar gmp gmp-devel libssh2 libssh2-devel openssl-devel gettext-devel 2>&1 | busybox tee -a install.log
 %pacman% -Sc --noconfirm 2>&1 | busybox tee -a install.log
 
 :Clone
