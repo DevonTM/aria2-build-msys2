@@ -35,7 +35,7 @@ for %%i in (mirrorlist.mingw32 mirrorlist.mingw64 mirrorlist.msys) do if exist %
 %pacman% -Sc --noconfirm 2>&1 | busybox tee -a install.log
 
 :Clone
-%sh%  -lc "if [[ -d ~/aria2 ]]; then cd aria2; git pull; else git clone https://github.com/myfreeer/aria2-build-msys2.git aria2; cd aria2; git pull; fi" 2>&1 | busybox tee -a clone.log
+%sh%  -lc "if [[ -d ~/aria2 ]]; then cd aria2; git pull; else git clone https://github.com/DevonTM/aria2-build-msys2.git aria2; cd aria2; git pull; fi" 2>&1 | busybox tee -a clone.log
 
 :Build
 %sh%  -lc "cd ~/aria2 && exec ./build-aria2.sh" 2>&1 | busybox tee -a build.log
