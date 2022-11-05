@@ -13,6 +13,7 @@ expat-*/*
 sqlite-autoconf-*/*
 c-ares-*/*
 libssh2-*/*
+cppunit-*/*
 
 # Test scripts
 *_test.*

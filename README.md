@@ -30,7 +30,7 @@ Should be set up with commands below:
 ```sh
 pacman -Syyuu --noconfirm
 pacman -Su --noconfirm
-pacman -S --noconfirm --needed base-devel zlib-devel sqlite git unzip zip tar gmp gmp-devel libssh2 libssh2-devel openssl-devel
+pacman -S --noconfirm --needed base-devel autotools zlib-devel sqlite git unzip zip tar gmp gmp-devel libssh2 libssh2-devel openssl-devel gettext-devel
 ```
 
 ### Artifacts

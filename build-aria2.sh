@@ -50,6 +50,17 @@ get_last_version() {
     echo "$ret"
 }
 
+# cppunit
+wget http://dev-www.libreoffice.org/src/cppunit-1.15.1.tar.gz
+tar xf cppunit-1.15.1.tar.gz
+cd cppunit-1.15.1 || exit 1
+./autogen.sh
+./configure --prefix=$PREFIX
+make -j$CPUCOUNT
+make install
+cd ..
+rm -rf cppunit-1.15.1
+
 # expat
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat_ver}" expat '2\.\d+\.\d+')"
