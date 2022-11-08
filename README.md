@@ -1,5 +1,5 @@
 ## Readme
-aria2 build scripts for `msys2` with custom patches.
+aria2 build scripts for `msys2` with custom patches and openssl.
 
 ### Build Status
 [![Build status](https://ci.appveyor.com/api/projects/status/fndjci8g5f71gf6l?svg=true)](https://ci.appveyor.com/project/myfreeer/aria2-build-msys2)
@@ -16,13 +16,11 @@ aria2 build scripts for `msys2` with custom patches.
 * option `continue`: change default value to `true`
 * option `retry-wait`: change default value to `1`
 * option `max-concurrent-downloads`: change default value to `16`
-* option `netrc-path` `conf-path` `dht-file-path` `dht-file-path6`: change default value to sub-folder of current directory
 * option `deamon`: make use of it on mingw
 * download: retry on slow speed and connection close
 * download: add option `retry-on-400` to retry on http 400 bad request, which only effective if retry-wait > 0
 * download: add option `retry-on-403` to retry on http 403 forbidden, which only effective if retry-wait > 0
 * download: add option `retry-on-406` to retry on http 406 not acceptable, which only effective if retry-wait > 0
-* http: add option `http-want-digest` to choose whether to send the generated `Want-Digest` HTTP header or not ([#10](https://github.com/myfreeer/aria2-build-msys2/issues/10)
 
 ### Environment 
 [MSYS2](http://www.msys2.org/)
@@ -30,7 +28,7 @@ Should be set up with commands below:
 ```sh
 pacman -Syyuu --noconfirm
 pacman -Su --noconfirm
-pacman -S --noconfirm --needed base-devel autotools zlib-devel sqlite git unzip zip tar gmp gmp-devel libssh2 libssh2-devel openssl-devel gettext-devel
+pacman -S --noconfirm --needed base-devel autotools git unzip zip tar gettext-devel
 ```
 
 ### Artifacts

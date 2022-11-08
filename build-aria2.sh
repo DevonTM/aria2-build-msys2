@@ -3,10 +3,12 @@ case $MSYSTEM in
 MINGW32)
     export MINGW_PACKAGE_PREFIX=mingw-w64-i686
     export HOST=i686-w64-mingw32
+    export OPENSSL_HOST=mingw
     ;;
 MINGW64)
     export MINGW_PACKAGE_PREFIX=mingw-w64-x86_64
     export HOST=x86_64-w64-mingw32
+    export OPENSSL_HOST=mingw64
     ;;
 esac
 
@@ -50,13 +52,45 @@ get_last_version() {
     echo "$ret"
 }
 
+# zlib
+wget -c https://zlib.net/zlib-1.2.13.tar.gz
+tar xf zlib-1.2.13.tar.gz
+cd zlib-1.2.13 || exit 1
+./configure \
+    --static \
+    --prefix=$PREFIX
+make -j $CPUCOUNT
+make install
+cd ..
+rm -rf zlib-1.2.13
+
+# openssl
+wget -c https://www.openssl.org/source/openssl-3.0.7.tar.gz
+tar xf openssl-3.0.7.tar.gz
+cd openssl-3.0.7 || exit 1
+./config \
+    --prefix=$PREFIX \
+    --openssldir=$PREFIX/ssl \
+    --libdir=lib \
+    -static \
+    no-shared \
+    $OPENSSL_HOST
+make -j $CPUCOUNT
+make install_sw
+cd ..
+rm -rf openssl-3.0.7
+
 # cppunit
-wget http://dev-www.libreoffice.org/src/cppunit-1.15.1.tar.gz
+wget -c https://dev-www.libreoffice.org/src/cppunit-1.15.1.tar.gz
 tar xf cppunit-1.15.1.tar.gz
 cd cppunit-1.15.1 || exit 1
 ./autogen.sh
-./configure --prefix=$PREFIX
-make -j$CPUCOUNT
+./configure \
+    --disable-shared \
+    --enable-static \
+    --prefix=$PREFIX \
+    --host=$HOST
+make -j $CPUCOUNT
 make install
 cd ..
 rm -rf cppunit-1.15.1
@@ -65,15 +99,15 @@ rm -rf cppunit-1.15.1
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat_ver}" expat '2\.\d+\.\d+')"
 expat_ver="${expat_ver:-2.2.10}"
-wget -c --no-check-certificate "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.bz2"
+wget -c "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.bz2"
 tar xf "expat-${expat_ver}.tar.bz2"
 cd "expat-${expat_ver}" || exit 1
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=/usr/local/$HOST \
+    --prefix=$PREFIX \
     --host=$HOST
-make install -j$CPUCOUNT
+make install -j $CPUCOUNT
 cd ..
 rm -rf "expat-${expat_ver}"
 
@@ -81,7 +115,7 @@ rm -rf "expat-${expat_ver}"
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
 [[ ! "$sqlite_ver" ]] && sqlite_ver="2020/sqlite-autoconf-3340000.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
-wget -c --no-check-certificate "https://www.sqlite.org/${sqlite_ver}"
+wget -c "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
 echo ${sqlite_ver}
 sqlite_name=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+)")
@@ -89,19 +123,19 @@ cd "${sqlite_name}" || exit 1
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=/usr/local/$HOST \
+    --prefix=$PREFIX \
     --host=$HOST
-make install -j$CPUCOUNT
+make install -j $CPUCOUNT
 cd ..
 rm -rf "${sqlite_name}"
 
-# c-ares: Async DNS support
+# c-ares
 [[ ! "$cares_ver" ]] &&
     cares_ver="$(clean_html_index https://c-ares.haxx.se/)" &&
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
 cares_ver="${cares_ver:-1.17.1}"
 echo "c-ares-${cares_ver}"
-wget -c --no-check-certificate "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
+wget -c "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
 cd "c-ares-${cares_ver}" || exit 1
 # https://github.com/c-ares/c-ares/issues/384
@@ -115,9 +149,9 @@ fi
     --enable-static \
     --without-random \
     --disable-tests \
-    --prefix=/usr/local/$HOST \
+    --prefix=$PREFIX \
     --host=$HOST
-make install -j$CPUCOUNT
+make install -j $CPUCOUNT
 cd ..
 rm -rf "c-ares-${cares_ver}"
 
@@ -127,9 +161,9 @@ rm -rf "c-ares-${cares_ver}"
     ssh_ver="$(get_last_version "$ssh_ver" tar.gz "1\.\d+\.\d")"
 ssh_ver="${ssh_ver:-1.9.0}"
 echo "${ssh_ver}"
-wget -c --no-check-certificate "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
+wget -c "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
 tar xf "libssh2-${ssh_ver}.tar.gz"
-cd "libssh2-${ssh_ver}"
+cd "libssh2-${ssh_ver}" || exit 1
 # https://github.com/libssh2/libssh2/pull/479
 # https://github.com/libssh2/libssh2/commit/ba149e804ef653cc05ed9803dfc94519ce9328f7
 if [ "${ssh_ver}" = "1.9.0" ]; then
@@ -138,21 +172,22 @@ fi
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=/usr/local/$HOST \
+    --prefix=$PREFIX \
     --host=$HOST \
-    --with-crypto=wincng \
-    LIBS="-lws2_32"
-make install -j$CPUCOUNT
+    --with-crypto=openssl \
+    LIBS="-lcrypt32"
+make install -j $CPUCOUNT
 cd ..
 rm -rf "libssh2-${ssh_ver}"
 
+# aria2
 if [[ -d aria2 ]]; then
     cd aria2
     git checkout master || git checkout HEAD
     git reset --hard origin || git reset --hard
     git pull
 else
-    git clone https://github.com/aria2/aria2 --depth=1 --config http.sslVerify=false
+    git clone https://github.com/aria2/aria2 --depth=1
     cd aria2 || exit 1
 fi
 git checkout -b patch
@@ -166,12 +201,13 @@ autoreconf -fi || autoreconf -fiv
     --disable-nls \
     --with-libcares \
     --without-gnutls \
-    --without-openssl \
+    --without-wintls \
+    --with-openssl \
     --with-sqlite3 \
     --without-libxml2 \
     --with-libexpat \
     --with-libz \
-    --with-libgmp \
+    --without-libgmp \
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
@@ -180,7 +216,7 @@ autoreconf -fi || autoreconf -fiv
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib -Wl,--gc-sections,--build-id=none" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
-make -j$CPUCOUNT
+make -j $CPUCOUNT
 strip -s src/aria2c.exe
 git checkout master
 git branch patch -D
