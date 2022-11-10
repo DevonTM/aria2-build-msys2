@@ -28,7 +28,7 @@ pacman -S --noconfirm --needed $MINGW_PACKAGE_PREFIX-gcc \
 PREFIX=/usr/local/$HOST
 CPUCOUNT=$(grep -c ^processor /proc/cpuinfo)
 curl_opts=(/usr/bin/curl --connect-timeout 15 --retry 3
-    --retry-delay 5 --silent --location --insecure --fail)
+    --retry-delay 5 --silent --location --fail)
 
 clean_html_index() {
     local url="$1"
@@ -53,21 +53,27 @@ get_last_version() {
 }
 
 # zlib
-wget -c https://zlib.net/zlib-1.2.13.tar.gz
-tar xf zlib-1.2.13.tar.gz
-cd zlib-1.2.13 || exit 1
+zlib_ver="$(clean_html_index https://zlib.net/)"
+zlib_ver="$(get_last_version "${zlib_ver}" zlib '1\.\d\.\d+')"
+zlib_ver="${zlib_ver:-1.2.13}"
+wget -c "https://zlib.net/zlib-${zlib_ver}.tar.gz"
+tar xf "zlib-${zlib_ver}.tar.gz"
+cd "zlib-${zlib_ver}" || exit 1
 ./configure \
     --static \
     --prefix=$PREFIX
 make -j $CPUCOUNT
 make install
 cd ..
-rm -rf zlib-1.2.13
+rm -rf "zlib-${zlib_ver}"
 
 # openssl
-wget -c https://www.openssl.org/source/openssl-3.0.7.tar.gz
-tar xf openssl-3.0.7.tar.gz
-cd openssl-3.0.7 || exit 1
+openssl_ver="$(clean_html_index https://www.openssl.org/source/)"
+openssl_ver="$(get_last_version "${openssl_ver}" openssl '3\.\d\.\d+')"
+openssl_ver="${openssl_ver:-3.0.7}"
+wget -c "https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz"
+tar xf "openssl-${openssl_ver}.tar.gz"
+cd "openssl-${openssl_ver}" || exit 1
 ./config \
     --prefix=$PREFIX \
     --openssldir=$PREFIX/ssl \
@@ -78,12 +84,15 @@ cd openssl-3.0.7 || exit 1
 make -j $CPUCOUNT
 make install_sw
 cd ..
-rm -rf openssl-3.0.7
+rm -rf "openssl-${openssl_ver}"
 
 # cppunit
-wget -c https://dev-www.libreoffice.org/src/cppunit-1.15.1.tar.gz
-tar xf cppunit-1.15.1.tar.gz
-cd cppunit-1.15.1 || exit 1
+cppunit_ver="$(clean_html_index https://dev-www.libreoffice.org/src/ 'cppunit-[0-9]+\.[0-9]+\.[0-9]+')"
+cppunit_ver="$(get_last_version "${cppunit_ver}" cppunit '1\.\d+\.\d')"
+cppunit_ver="${cppunit_ver:-1.15.1}"
+wget -c "https://dev-www.libreoffice.org/src/cppunit-${cppunit_ver}.tar.gz"
+tar xf "cppunit-${cppunit_ver}.tar.gz"
+cd "cppunit-${cppunit_ver}" || exit 1
 ./autogen.sh
 ./configure \
     --disable-shared \
@@ -93,12 +102,12 @@ cd cppunit-1.15.1 || exit 1
 make -j $CPUCOUNT
 make install
 cd ..
-rm -rf cppunit-1.15.1
+rm -rf "cppunit-${cppunit_ver}"
 
 # expat
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat_ver}" expat '2\.\d+\.\d+')"
-expat_ver="${expat_ver:-2.2.10}"
+expat_ver="${expat_ver:-2.5.0}"
 wget -c "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.bz2"
 tar xf "expat-${expat_ver}.tar.bz2"
 cd "expat-${expat_ver}" || exit 1
@@ -113,7 +122,7 @@ rm -rf "expat-${expat_ver}"
 
 # sqlite
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2020/sqlite-autoconf-3340000.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2022/sqlite-autoconf-3390400.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
@@ -133,17 +142,11 @@ rm -rf "${sqlite_name}"
 [[ ! "$cares_ver" ]] &&
     cares_ver="$(clean_html_index https://c-ares.haxx.se/)" &&
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
-cares_ver="${cares_ver:-1.17.1}"
+cares_ver="${cares_ver:-1.18.1}"
 echo "c-ares-${cares_ver}"
 wget -c "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
 cd "c-ares-${cares_ver}" || exit 1
-# https://github.com/c-ares/c-ares/issues/384
-# https://github.com/c-ares/c-ares/commit/c35f8ff50710cd38776e9560389504dbd96307fa
-if [ "${cares_ver}" = "1.17.1" ]; then
-    patch -p1 < ../c-ares-1.17.1-fix-autotools-static-library.patch
-    autoreconf -fi || autoreconf -fiv
-fi
 ./configure \
     --disable-shared \
     --enable-static \
@@ -159,16 +162,11 @@ rm -rf "c-ares-${cares_ver}"
 [[ ! "$ssh_ver" ]] &&
     ssh_ver="$(clean_html_index https://libssh2.org/download/)" &&
     ssh_ver="$(get_last_version "$ssh_ver" tar.gz "1\.\d+\.\d")"
-ssh_ver="${ssh_ver:-1.9.0}"
+ssh_ver="${ssh_ver:-1.10.0}"
 echo "${ssh_ver}"
 wget -c "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
 tar xf "libssh2-${ssh_ver}.tar.gz"
 cd "libssh2-${ssh_ver}" || exit 1
-# https://github.com/libssh2/libssh2/pull/479
-# https://github.com/libssh2/libssh2/commit/ba149e804ef653cc05ed9803dfc94519ce9328f7
-if [ "${ssh_ver}" = "1.9.0" ]; then
-    patch -p1 < ../libssh2-1.9.0-wincng-multiple-definition.patch
-fi
 ./configure \
     --disable-shared \
     --enable-static \

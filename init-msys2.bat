@@ -31,7 +31,7 @@ for %%i in (mirrorlist.mingw32 mirrorlist.mingw64 mirrorlist.msys) do if exist %
 %pacman% -Suu --needed --noconfirm --ask=20 2>&1 | busybox tee -a update.log
 
 :Install
-%pacman% -S --needed --noconfirm base-devel autotools git unzip zip tar gettext-devel 2>&1 | busybox tee -a install.log
+%pacman% -S --needed --noconfirm base-devel autotools git unzip zip gettext-devel 2>&1 | busybox tee -a install.log
 %pacman% -Sc --noconfirm 2>&1 | busybox tee -a install.log
 
 :Clone
