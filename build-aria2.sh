@@ -3,12 +3,10 @@ case $MSYSTEM in
 MINGW32)
     export MINGW_PACKAGE_PREFIX=mingw-w64-i686
     export HOST=i686-w64-mingw32
-    export OPENSSL_HOST=mingw
     ;;
 MINGW64)
     export MINGW_PACKAGE_PREFIX=mingw-w64-x86_64
     export HOST=x86_64-w64-mingw32
-    export OPENSSL_HOST=mingw64
     ;;
 esac
 
@@ -22,8 +20,7 @@ if [[ "${GIT_USER_EMAIL}" = "" ]]; then
     git config --global user.email "you@example.com"
 fi
 
-pacman -S --noconfirm --needed $MINGW_PACKAGE_PREFIX-gcc \
-    $MINGW_PACKAGE_PREFIX-winpthreads
+pacman -S --noconfirm --needed $MINGW_PACKAGE_PREFIX-gcc
 
 PREFIX=/usr/local/$HOST
 CPUCOUNT=$(grep -c ^processor /proc/cpuinfo)
@@ -76,11 +73,9 @@ tar xf "openssl-${openssl_ver}.tar.gz"
 cd "openssl-${openssl_ver}" || exit 1
 ./config \
     --prefix=$PREFIX \
-    --openssldir=$PREFIX/ssl \
     --libdir=lib \
     -static \
-    no-shared \
-    $OPENSSL_HOST
+    no-shared
 make -j $CPUCOUNT
 make install_sw
 cd ..
@@ -97,8 +92,7 @@ cd "cppunit-${cppunit_ver}" || exit 1
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=$PREFIX \
-    --host=$HOST
+    --prefix=$PREFIX
 make -j $CPUCOUNT
 make install
 cd ..
@@ -114,8 +108,7 @@ cd "expat-${expat_ver}" || exit 1
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=$PREFIX \
-    --host=$HOST
+    --prefix=$PREFIX
 make install -j $CPUCOUNT
 cd ..
 rm -rf "expat-${expat_ver}"
@@ -132,8 +125,7 @@ cd "${sqlite_name}" || exit 1
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=$PREFIX \
-    --host=$HOST
+    --prefix=$PREFIX
 make install -j $CPUCOUNT
 cd ..
 rm -rf "${sqlite_name}"
@@ -152,8 +144,7 @@ cd "c-ares-${cares_ver}" || exit 1
     --enable-static \
     --without-random \
     --disable-tests \
-    --prefix=$PREFIX \
-    --host=$HOST
+    --prefix=$PREFIX
 make install -j $CPUCOUNT
 cd ..
 rm -rf "c-ares-${cares_ver}"
@@ -170,8 +161,7 @@ cd "libssh2-${ssh_ver}" || exit 1
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=$PREFIX \
-    --host=$HOST \
+    --prefix=$PREFIX
     --with-crypto=openssl \
     LIBS="-lcrypt32"
 make install -j $CPUCOUNT
@@ -193,7 +183,6 @@ git am -3 ../aria2-*.patch
 
 autoreconf -fi || autoreconf -fiv
 ./configure \
-    --host=$HOST \
     --prefix=$PREFIX \
     --without-included-gettext \
     --disable-nls \

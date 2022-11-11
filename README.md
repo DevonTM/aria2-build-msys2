@@ -23,7 +23,7 @@ aria2 build scripts for `msys2` with custom patches and openssl.
 * download: add option `retry-on-406` to retry on http 406 not acceptable, which only effective if retry-wait > 0
 
 ### Environment 
-[MSYS2](http://www.msys2.org/)
+[MSYS2](https://www.msys2.org/)
 Should be set up with commands below:
 ```sh
 pacman -Syyuu --noconfirm

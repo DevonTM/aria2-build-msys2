@@ -13,7 +13,7 @@ if exist msys64\mingw64.exe goto :Update
 if exist busybox.exe if exist msys2-x86_64-latest.tar.xz goto :Extract
 echo. dependency broken. download msys2-x86_64-latest.tar.xz and busybox.exe and put them in the same folder of the script.
 echo. download busybox.exe from https://frippery.org/files/busybox/busybox.exe
-echo. and deonload msys2-x86_64-latest.tar.xz from http://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz
+echo. and download msys2-x86_64-latest.tar.xz from https://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz
 pause
 exit /B -1
 
