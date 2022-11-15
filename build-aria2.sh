@@ -74,8 +74,7 @@ cd "openssl-${openssl_ver}" || exit 1
 ./config \
     --prefix=$PREFIX \
     --libdir=lib \
-    -static \
-    no-shared
+    -static
 make -j $CPUCOUNT
 make install_sw
 cd ..
@@ -161,7 +160,7 @@ cd "libssh2-${ssh_ver}" || exit 1
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=$PREFIX
+    --prefix=$PREFIX \
     --with-crypto=openssl \
     LIBS="-lcrypt32"
 make install -j $CPUCOUNT
