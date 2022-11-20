@@ -114,7 +114,7 @@ rm -rf "expat-${expat_ver}"
 
 # sqlite
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2022/sqlite-autoconf-3390400.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2022/sqlite-autoconf-3400000.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
