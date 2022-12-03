@@ -59,14 +59,13 @@ cd "zlib-${zlib_ver}" || exit 1
 ./configure \
     --static \
     --prefix=$PREFIX
-make -j $CPUCOUNT
-make install
+make install -j $CPUCOUNT
 cd ..
 rm -rf "zlib-${zlib_ver}"
 
 # openssl
 openssl_ver="$(clean_html_index https://www.openssl.org/source/)"
-openssl_ver="$(get_last_version "${openssl_ver}" openssl '3\.\d\.\d+')"
+openssl_ver="$(get_last_version "${openssl_ver}" openssl '3\.0\.\d+')"
 openssl_ver="${openssl_ver:-3.0.7}"
 wget -c "https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz"
 tar xf "openssl-${openssl_ver}.tar.gz"
@@ -92,8 +91,7 @@ cd "cppunit-${cppunit_ver}" || exit 1
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX
-make -j $CPUCOUNT
-make install
+make install -j $CPUCOUNT
 cd ..
 rm -rf "cppunit-${cppunit_ver}"
 
