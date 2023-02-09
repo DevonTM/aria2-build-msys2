@@ -23,7 +23,7 @@ fi
 pacman -S --noconfirm --needed $MINGW_PACKAGE_PREFIX-gcc
 
 PREFIX=/usr/local/$HOST
-CPUCOUNT=$(grep -c ^processor /proc/cpuinfo)
+CPUCOUNT=$(nproc)
 curl_opts=(/usr/bin/curl --connect-timeout 15 --retry 3
     --retry-delay 5 --silent --location --fail)
 
@@ -66,7 +66,7 @@ rm -rf "zlib-${zlib_ver}"
 # openssl
 openssl_ver="$(clean_html_index https://www.openssl.org/source/)"
 openssl_ver="$(get_last_version "${openssl_ver}" openssl '3\.0\.\d+')"
-openssl_ver="${openssl_ver:-3.0.7}"
+openssl_ver="${openssl_ver:-3.0.8}"
 wget -c "https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz"
 tar xf "openssl-${openssl_ver}.tar.gz"
 cd "openssl-${openssl_ver}" || exit 1
@@ -112,7 +112,7 @@ rm -rf "expat-${expat_ver}"
 
 # sqlite
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2022/sqlite-autoconf-3400000.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2022/sqlite-autoconf-3400100.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
@@ -131,7 +131,7 @@ rm -rf "${sqlite_name}"
 [[ ! "$cares_ver" ]] &&
     cares_ver="$(clean_html_index https://c-ares.haxx.se/)" &&
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
-cares_ver="${cares_ver:-1.18.1}"
+cares_ver="${cares_ver:-1.19.0}"
 echo "c-ares-${cares_ver}"
 wget -c "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
