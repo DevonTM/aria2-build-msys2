@@ -66,7 +66,7 @@ rm -rf "zlib-${zlib_ver}"
 # openssl
 openssl_ver="$(clean_html_index https://www.openssl.org/source/)"
 openssl_ver="$(get_last_version "${openssl_ver}" openssl '3\.1\.\d+')"
-openssl_ver="${openssl_ver:-3.1.0}"
+openssl_ver="${openssl_ver:-3.1.1}"
 wget -c "https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz"
 tar xf "openssl-${openssl_ver}.tar.gz"
 cd "openssl-${openssl_ver}" || exit 1
@@ -99,8 +99,8 @@ rm -rf "cppunit-${cppunit_ver}"
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat_ver}" expat '2\.\d+\.\d+')"
 expat_ver="${expat_ver:-2.5.0}"
-wget -c "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.bz2"
-tar xf "expat-${expat_ver}.tar.bz2"
+wget -c "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.gz"
+tar xf "expat-${expat_ver}.tar.gz"
 cd "expat-${expat_ver}" || exit 1
 ./configure \
     --disable-shared \
@@ -129,11 +129,11 @@ rm -rf "${sqlite_name}"
 
 # c-ares
 [[ ! "$cares_ver" ]] &&
-    cares_ver="$(clean_html_index https://c-ares.haxx.se/)" &&
+    cares_ver="$(clean_html_index https://c-ares.org/)" &&
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
 cares_ver="${cares_ver:-1.19.1}"
 echo "c-ares-${cares_ver}"
-wget -c "https://c-ares.haxx.se/download/c-ares-${cares_ver}.tar.gz"
+wget -c "https://c-ares.org/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
 cd "c-ares-${cares_ver}" || exit 1
 ./configure \
@@ -149,18 +149,19 @@ rm -rf "c-ares-${cares_ver}"
 # libssh2
 [[ ! "$ssh_ver" ]] &&
     ssh_ver="$(clean_html_index https://libssh2.org/download/)" &&
-    ssh_ver="$(get_last_version "$ssh_ver" tar.gz "1\.\d+\.\d")"
+    ssh_ver="$(get_last_version "$ssh_ver" tar.gz "1\.10\.\d")"
 ssh_ver="${ssh_ver:-1.10.0}"
 echo "${ssh_ver}"
 wget -c "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
 tar xf "libssh2-${ssh_ver}.tar.gz"
 cd "libssh2-${ssh_ver}" || exit 1
+patch -p1 -i ../libssh2-pkgconfig.patch
 ./configure \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
-    --with-crypto=openssl \
-    LIBS="-lcrypt32"
+    --disable-examples-build \
+    --with-crypto=wincng
 make install -j $CPUCOUNT
 cd ..
 rm -rf "libssh2-${ssh_ver}"
