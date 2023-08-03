@@ -66,7 +66,7 @@ rm -rf "zlib-${zlib_ver}"
 # openssl
 openssl_ver="$(clean_html_index https://www.openssl.org/source/)"
 openssl_ver="$(get_last_version "${openssl_ver}" openssl '3\.1\.\d+')"
-openssl_ver="${openssl_ver:-3.1.1}"
+openssl_ver="${openssl_ver:-3.1.2}"
 wget -c "https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz"
 tar xf "openssl-${openssl_ver}.tar.gz"
 cd "openssl-${openssl_ver}" || exit 1
@@ -136,34 +136,44 @@ echo "c-ares-${cares_ver}"
 wget -c "https://c-ares.org/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
 cd "c-ares-${cares_ver}" || exit 1
-./configure \
-    --disable-shared \
-    --enable-static \
-    --without-random \
-    --disable-tests \
-    --prefix=$PREFIX
-make install -j $CPUCOUNT
-cd ..
+mkdir build
+cd build
+cmake \
+    -G "Ninja" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCARES_STATIC=ON \
+    -DCARES_SHARED=OFF \
+    -DCMAKE_INSTALL_PREFIX=$PREFIX \
+    ..
+cmake --build . -j $CPUCOUNT
+cmake --install .
+cd ../..
 rm -rf "c-ares-${cares_ver}"
 
 # libssh2
 [[ ! "$ssh_ver" ]] &&
     ssh_ver="$(clean_html_index https://libssh2.org/download/)" &&
-    ssh_ver="$(get_last_version "$ssh_ver" tar.gz "1\.10\.\d")"
-ssh_ver="${ssh_ver:-1.10.0}"
+    ssh_ver="$(get_last_version "$ssh_ver" tar.gz "1\.\d+\.\d")"
+ssh_ver="${ssh_ver:-1.11.0}"
 echo "${ssh_ver}"
 wget -c "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
 tar xf "libssh2-${ssh_ver}.tar.gz"
 cd "libssh2-${ssh_ver}" || exit 1
 patch -p1 -i ../libssh2-pkgconfig.patch
-./configure \
-    --disable-shared \
-    --enable-static \
-    --prefix=$PREFIX \
-    --disable-examples-build \
-    --with-crypto=wincng
-make install -j $CPUCOUNT
-cd ..
+mkdir build
+cd build
+cmake \
+    -G "Ninja" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_STATIC_LIBS=ON \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DCRYPTO_BACKEND=OpenSSL \
+    -DCMAKE_PREFIX_PATH=$PREFIX \
+    -DCMAKE_INSTALL_PREFIX=$PREFIX \
+    ..
+cmake --build . -j $CPUCOUNT
+cmake --install .
+cd ../..
 rm -rf "libssh2-${ssh_ver}"
 
 # aria2
@@ -197,6 +207,7 @@ autoreconf -fi || autoreconf -fiv
     --without-libgcrypt \
     --without-libnettle \
     --with-cppunit-prefix=$PREFIX \
+    --enable-shared=no \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib -Wl,--gc-sections,--build-id=none" \
