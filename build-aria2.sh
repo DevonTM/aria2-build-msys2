@@ -20,7 +20,9 @@ if [[ "${GIT_USER_EMAIL}" = "" ]]; then
     git config --global user.email "you@example.com"
 fi
 
-pacman -S --noconfirm --needed $MINGW_PACKAGE_PREFIX-gcc
+pacman -S --noconfirm --needed \
+    $MINGW_PACKAGE_PREFIX-gcc \
+    $MINGW_PACKAGE_PREFIX-cmake
 
 PREFIX=/usr/local/$HOST
 CPUCOUNT=$(nproc)
