@@ -81,22 +81,6 @@ make install_sw
 cd ..
 rm -rf "openssl-${openssl_ver}"
 
-# cppunit
-cppunit_ver="$(clean_html_index https://dev-www.libreoffice.org/src/ 'cppunit-[0-9]+\.[0-9]+\.[0-9]+')"
-cppunit_ver="$(get_last_version "${cppunit_ver}" cppunit '1\.\d+\.\d')"
-cppunit_ver="${cppunit_ver:-1.15.1}"
-wget -c "https://dev-www.libreoffice.org/src/cppunit-${cppunit_ver}.tar.gz"
-tar xf "cppunit-${cppunit_ver}.tar.gz"
-cd "cppunit-${cppunit_ver}" || exit 1
-./autogen.sh
-./configure \
-    --disable-shared \
-    --enable-static \
-    --prefix=$PREFIX
-make install -j $CPUCOUNT
-cd ..
-rm -rf "cppunit-${cppunit_ver}"
-
 # expat
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat_ver}" expat '2\.\d+\.\d+')"
