@@ -54,7 +54,7 @@ get_last_version() {
 # zlib
 zlib_ver="$(clean_html_index https://zlib.net/)"
 zlib_ver="$(get_last_version "${zlib_ver}" zlib '1\.\d\.\d+')"
-zlib_ver="${zlib_ver:-1.2.13}"
+zlib_ver="${zlib_ver:-1.3}"
 wget -c "https://zlib.net/zlib-${zlib_ver}.tar.gz"
 tar xf "zlib-${zlib_ver}.tar.gz"
 cd "zlib-${zlib_ver}" || exit 1
@@ -98,7 +98,7 @@ rm -rf "expat-${expat_ver}"
 
 # sqlite
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2023/sqlite-autoconf-3420000.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2023/sqlite-autoconf-3430000.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
@@ -154,6 +154,7 @@ cmake \
     -DBUILD_STATIC_LIBS=ON \
     -DBUILD_SHARED_LIBS=OFF \
     -DCRYPTO_BACKEND=OpenSSL \
+    -DENABLE_ZLIB_COMPRESSION=ON \
     -DCMAKE_PREFIX_PATH=$PREFIX \
     -DCMAKE_INSTALL_PREFIX=$PREFIX \
     ..
