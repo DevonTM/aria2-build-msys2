@@ -26,7 +26,7 @@ pacman -S --noconfirm --needed \
 
 PREFIX=/usr/local/$HOST
 CPUCOUNT=$(nproc)
-curl_opts=(/usr/bin/curl --connect-timeout 15 --retry 3
+curl_opts=(curl --connect-timeout 15 --retry 3
     --retry-delay 5 --silent --location --fail)
 
 clean_html_index() {
@@ -46,8 +46,8 @@ get_last_version() {
     local filter="$2"
     local version="$3"
     local ret
-    ret="$(echo "$filelist" | /usr/bin/grep -E "$filter" | sort -V | tail -1)"
-    [[ -n "$version" ]] && ret="$(echo "$ret" | /usr/bin/grep -oP "$version")"
+    ret="$(echo "$filelist" | grep -E "$filter" | sort -V | tail -1)"
+    [[ -n "$version" ]] && ret="$(echo "$ret" | grep -oP "$version")"
     echo "$ret"
 }
 
@@ -66,8 +66,9 @@ cd ..
 rm -rf "zlib-${zlib_ver}"
 
 # openssl
-openssl_ver="$(clean_html_index https://www.openssl.org/source/)"
-openssl_ver="$(get_last_version "${openssl_ver}" openssl '3\.1\.\d+')"
+openssl_ver="$(clean_html_index https://www.openssl.org/source/ | grep -Eo 'openssl-3\.[0-9]+\.[0-9]+.tar.gz' |
+    sort -t- -k2,2Vr -k3,3Vr | head -n 1)"
+openssl_ver="$(echo $openssl_ver | grep -oP '\d+\.\d+\.\d+')"
 openssl_ver="${openssl_ver:-3.1.2}"
 wget -c "https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz"
 tar xf "openssl-${openssl_ver}.tar.gz"
@@ -91,18 +92,21 @@ cd "expat-${expat_ver}" || exit 1
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=$PREFIX
+    --prefix=$PREFIX \
+    --without-xmlwf \
+    --without-examples \
+    --without-tests \
+    --without-docbook
 make install -j $CPUCOUNT
 cd ..
 rm -rf "expat-${expat_ver}"
 
 # sqlite
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2023/sqlite-autoconf-3430000.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2023/sqlite-autoconf-3430100.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
-echo ${sqlite_ver}
 sqlite_name=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+)")
 cd "${sqlite_name}" || exit 1
 ./configure \
@@ -118,18 +122,18 @@ rm -rf "${sqlite_name}"
     cares_ver="$(clean_html_index https://c-ares.org/)" &&
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
 cares_ver="${cares_ver:-1.19.1}"
-echo "c-ares-${cares_ver}"
 wget -c "https://c-ares.org/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
 cd "c-ares-${cares_ver}" || exit 1
-mkdir build
-cd build
+mkdir build && cd build
 cmake \
-    -G "Ninja" \
+    -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=$PREFIX \
     -DCARES_STATIC=ON \
     -DCARES_SHARED=OFF \
-    -DCMAKE_INSTALL_PREFIX=$PREFIX \
+    -DCARES_BUILD_TOOLS=OFF \
+    -DCARES_RANDOM_FILE=/dev/urandom \
     ..
 cmake --build . -j $CPUCOUNT
 cmake --install .
@@ -141,22 +145,22 @@ rm -rf "c-ares-${cares_ver}"
     ssh_ver="$(clean_html_index https://libssh2.org/download/)" &&
     ssh_ver="$(get_last_version "$ssh_ver" tar.gz "1\.\d+\.\d")"
 ssh_ver="${ssh_ver:-1.11.0}"
-echo "${ssh_ver}"
 wget -c "https://libssh2.org/download/libssh2-${ssh_ver}.tar.gz"
 tar xf "libssh2-${ssh_ver}.tar.gz"
 cd "libssh2-${ssh_ver}" || exit 1
 patch -p1 -i ../libssh2-pkgconfig.patch
-mkdir build
-cd build
+mkdir build && cd build
 cmake \
-    -G "Ninja" \
+    -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=$PREFIX \
+    -DCMAKE_PREFIX_PATH=$PREFIX \
     -DBUILD_STATIC_LIBS=ON \
     -DBUILD_SHARED_LIBS=OFF \
     -DCRYPTO_BACKEND=OpenSSL \
     -DENABLE_ZLIB_COMPRESSION=ON \
-    -DCMAKE_PREFIX_PATH=$PREFIX \
-    -DCMAKE_INSTALL_PREFIX=$PREFIX \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_TESTING=OFF \
     ..
 cmake --build . -j $CPUCOUNT
 cmake --install .
@@ -166,8 +170,9 @@ rm -rf "libssh2-${ssh_ver}"
 # aria2
 if [[ -d aria2 ]]; then
     cd aria2
-    git checkout master || git checkout HEAD
-    git reset --hard origin || git reset --hard
+    git checkout master
+    git reset --hard
+    git clean -xdf
     git pull
 else
     git clone https://github.com/aria2/aria2 --depth=1
@@ -179,11 +184,12 @@ git am -3 ../aria2-*.patch
 autoreconf -fi || autoreconf -fiv
 ./configure \
     --prefix=$PREFIX \
-    --without-included-gettext \
     --disable-nls \
+    --without-libuv \
     --with-libcares \
-    --without-gnutls \
+    --without-appletls \
     --without-wintls \
+    --without-gnutls \
     --with-openssl \
     --with-sqlite3 \
     --without-libxml2 \
@@ -193,7 +199,7 @@ autoreconf -fi || autoreconf -fiv
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
-    --with-cppunit-prefix=$PREFIX \
+    --without-included-gettext \
     --enable-shared=no \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
@@ -201,6 +207,7 @@ autoreconf -fi || autoreconf -fiv
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j $CPUCOUNT
 strip -s src/aria2c.exe
+mv src/aria2c.exe ../$HOST-aria2c.exe
 git checkout master
 git branch patch -D
-cd ..
+git clean -xdf

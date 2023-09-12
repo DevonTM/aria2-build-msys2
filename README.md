@@ -28,7 +28,7 @@ Should be set up with commands below:
 ```sh
 pacman -Syyuu --noconfirm
 pacman -Su --noconfirm
-pacman -S --noconfirm --needed base-devel autotools ninja git unzip zip gettext-devel
+pacman -S --noconfirm --needed base-devel autotools ninja git gettext-devel
 ```
 
 ### Artifacts
