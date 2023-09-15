@@ -161,6 +161,8 @@ cmake \
     -DENABLE_ZLIB_COMPRESSION=ON \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_TESTING=OFF \
+    -DRUN_DOCKER_TESTS=OFF \
+    -DRUN_SSHD_TESTS=OFF \
     ..
 cmake --build . -j $CPUCOUNT
 cmake --install .
