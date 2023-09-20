@@ -69,7 +69,7 @@ rm -rf "zlib-${zlib_ver}"
 openssl_ver="$(clean_html_index https://www.openssl.org/source/ | grep -Eo 'openssl-3\.[0-9]+\.[0-9]+.tar.gz' |
     sort -t- -k2,2Vr -k3,3Vr | head -n 1)"
 openssl_ver="$(echo $openssl_ver | grep -oP '\d+\.\d+\.\d+')"
-openssl_ver="${openssl_ver:-3.1.2}"
+openssl_ver="${openssl_ver:-3.1.3}"
 wget -c "https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz"
 tar xf "openssl-${openssl_ver}.tar.gz"
 cd "openssl-${openssl_ver}" || exit 1
@@ -77,8 +77,8 @@ cd "openssl-${openssl_ver}" || exit 1
     --prefix=$PREFIX \
     --libdir=lib \
     -static
-make build_sw -j $CPUCOUNT
-make install_sw
+make build_libs -j $CPUCOUNT
+make install_dev
 cd ..
 rm -rf "openssl-${openssl_ver}"
 
