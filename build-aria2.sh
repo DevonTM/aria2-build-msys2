@@ -76,7 +76,8 @@ cd "openssl-${openssl_ver}" || exit 1
 ./config \
     --prefix=$PREFIX \
     --libdir=lib \
-    -static
+    no-pic \
+    no-shared
 make build_libs -j $CPUCOUNT
 make install_dev
 cd ..
@@ -112,7 +113,9 @@ cd "${sqlite_name}" || exit 1
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=$PREFIX
+    --prefix=$PREFIX \
+    CPPFLAGS="-I$PREFIX/include" \
+    LDFLAGS="-L$PREFIX/lib"
 make install -j $CPUCOUNT
 cd ..
 rm -rf "${sqlite_name}"
