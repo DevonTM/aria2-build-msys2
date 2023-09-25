@@ -177,7 +177,7 @@ if [[ -d aria2 ]]; then
     cd aria2
     git checkout master
     git reset --hard
-    git clean -xdf
+    git clean -xdfq
     git pull
 else
     git clone https://github.com/aria2/aria2 --depth=1
@@ -215,4 +215,4 @@ strip -s src/aria2c.exe
 mv src/aria2c.exe ../$HOST-aria2c.exe
 git checkout master
 git branch patch -D
-git clean -xdf
+git clean -xdfq
