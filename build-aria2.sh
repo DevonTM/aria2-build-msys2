@@ -173,19 +173,19 @@ cd ../..
 rm -rf "libssh2-${ssh_ver}"
 
 # aria2
+TAG=release-1.37.0
 if [[ -d aria2 ]]; then
     cd aria2
-    git checkout master
+    git checkout $TAG
     git reset --hard
     git clean -xdfq
     git pull
 else
-    git clone https://github.com/aria2/aria2 --depth=1
+    git clone https://github.com/aria2/aria2 -b $TAG --single-branch --depth=1
     cd aria2 || exit 1
 fi
 git checkout -b patch
 git am -3 ../aria2-*.patch
-
 autoreconf -fi || autoreconf -fiv
 ./configure \
     --prefix=$PREFIX \
@@ -213,6 +213,6 @@ autoreconf -fi || autoreconf -fiv
 make -j $CPUCOUNT
 strip -s src/aria2c.exe
 mv src/aria2c.exe ../$HOST-aria2c.exe
-git checkout master
+git checkout $TAG
 git branch patch -D
 git clean -xdfq
