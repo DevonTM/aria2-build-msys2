@@ -128,6 +128,7 @@ cares_ver="${cares_ver:-1.25.0}"
 wget -c "https://c-ares.org/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
 cd "c-ares-${cares_ver}" || exit 1
+curl -sSL "https://raw.githubusercontent.com/msys2/MINGW-packages/master/mingw-w64-c-ares/0002-cares-pkgconfig-fix-paths-and-flags.patch" | patch -p1
 mkdir build && cd build
 cmake \
     -GNinja \
