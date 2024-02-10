@@ -54,7 +54,7 @@ get_last_version() {
 # zlib
 zlib_ver="$(clean_html_index https://zlib.net/)"
 zlib_ver="$(get_last_version "${zlib_ver}" zlib '1\.\d\.\d+')"
-zlib_ver="${zlib_ver:-1.3}"
+zlib_ver="${zlib_ver:-1.3.1}"
 wget -c "https://zlib.net/zlib-${zlib_ver}.tar.gz"
 tar xf "zlib-${zlib_ver}.tar.gz"
 cd "zlib-${zlib_ver}" || exit 1
@@ -69,7 +69,7 @@ rm -rf "zlib-${zlib_ver}"
 openssl_ver="$(clean_html_index https://www.openssl.org/source/ | grep -Eo 'openssl-3\.[0-9]+\.[0-9]+.tar.gz' |
     sort -t- -k2,2Vr -k3,3Vr | head -n 1)"
 openssl_ver="$(echo $openssl_ver | grep -oP '\d+\.\d+\.\d+')"
-openssl_ver="${openssl_ver:-3.2.0}"
+openssl_ver="${openssl_ver:-3.2.1}"
 wget -c "https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz"
 tar xf "openssl-${openssl_ver}.tar.gz"
 cd "openssl-${openssl_ver}" || exit 1
@@ -86,7 +86,7 @@ rm -rf "openssl-${openssl_ver}"
 # expat
 expat_ver="$(clean_html_index https://sourceforge.net/projects/expat/files/expat/ 'expat/[0-9]+\.[0-9]+\.[0-9]+')"
 expat_ver="$(get_last_version "${expat_ver}" expat '2\.\d+\.\d+')"
-expat_ver="${expat_ver:-2.5.0}"
+expat_ver="${expat_ver:-2.6.0}"
 wget -c "https://downloads.sourceforge.net/project/expat/expat/${expat_ver}/expat-${expat_ver}.tar.gz"
 tar xf "expat-${expat_ver}.tar.gz"
 cd "expat-${expat_ver}" || exit 1
@@ -104,7 +104,7 @@ rm -rf "expat-${expat_ver}"
 
 # sqlite
 sqlite_ver=$(clean_html_index_sqlite "https://www.sqlite.org/download.html")
-[[ ! "$sqlite_ver" ]] && sqlite_ver="2023/sqlite-autoconf-3440200.tar.gz"
+[[ ! "$sqlite_ver" ]] && sqlite_ver="2023/sqlite-autoconf-3450100.tar.gz"
 sqlite_file=$(echo ${sqlite_ver} | grep -ioP "(sqlite-autoconf-\d+\.tar\.gz)")
 wget -c "https://www.sqlite.org/${sqlite_ver}"
 tar xf "${sqlite_file}"
@@ -124,7 +124,7 @@ rm -rf "${sqlite_name}"
 [[ ! "$cares_ver" ]] &&
     cares_ver="$(clean_html_index https://c-ares.org/)" &&
     cares_ver="$(get_last_version "$cares_ver" c-ares "1\.\d+\.\d")"
-cares_ver="${cares_ver:-1.25.0}"
+cares_ver="${cares_ver:-1.26.0}"
 wget -c "https://c-ares.org/download/c-ares-${cares_ver}.tar.gz"
 tar xf "c-ares-${cares_ver}.tar.gz"
 cd "c-ares-${cares_ver}" || exit 1
