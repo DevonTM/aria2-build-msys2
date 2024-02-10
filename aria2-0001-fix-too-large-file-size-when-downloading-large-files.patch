@@ -1,0 +1,26 @@
+From c7ff043ac895f86b47aee0d025b1419f070fed52 Mon Sep 17 00:00:00 2001
+From: Irfan Ammar Afif <ipangcheater@gmail.com>
+Date: Sat, 10 Feb 2024 11:31:47 +0700
+Subject: [PATCH] Fix "Too large file size" when downloading large files
+
+The aria2 compiled with MSYS2 was encountering a "Too large file size" error when attempting to download files larger than 2GB. This issue was resolved by changing the offset type to 64-bit.
+---
+ src/a2io.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/a2io.h b/src/a2io.h
+index 27ddc518..e3876570 100644
+--- a/src/a2io.h
++++ b/src/a2io.h
+@@ -141,7 +141,7 @@
+ #  define a2open(path, flags, mode) _wsopen(path, flags, _SH_DENYNO, mode)
+ #  define a2fopen(path, mode) _wfsopen(path, mode, _SH_DENYNO)
+ // # define a2ftruncate(fd, length): We don't use ftruncate in Mingw build
+-#  define a2_off_t off_t
++#  define a2_off_t off64_t
+ #elif defined(__ANDROID__) || defined(ANDROID)
+ #  define a2lseek(fd, offset, origin) lseek64(fd, offset, origin)
+ // # define a2fseek(fp, offset, origin): No fseek64 and not used in aria2
+-- 
+2.43.0.windows.1
+
